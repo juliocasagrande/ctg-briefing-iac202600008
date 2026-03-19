@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAC202600008 — Substituição dos Sistemas SCADA | Briefing para Proponentes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══ TOKENS ══ */
+:root {
+  --ctg-blue:       #0066B3;
+  --ctg-blue-dark:  #003A6B;
+  --ctg-blue-mid:   #0052A3;
+  --ctg-blue-light: #0080CC;
+  --ctg-cyan:       #00AEEF;
+  --ctg-pale:       rgba(0,102,179,0.07);
+  --ink:            #0D1A2E;
+  --ink-mid:        #3A526B;
+  --ink-soft:       #7A90A8;
+  --paper:          #F5F7FA;
+  --paper-alt:      #EEF1F6;
+  --surface:        #FFFFFF;
+  --border:         rgba(13,26,46,0.09);
+  --border-blue:    rgba(0,102,179,0.2);
+  --warn-red:       #C0392B;
+  --warn-bg:        rgba(192,57,43,0.07);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════
+   VÍDEO DE FUNDO — SCROLL SCRUBBING
+   Fica fixo na viewport. Começa invisível
+   e aparece conforme o usuário passa pelo
+   hero. Permanece durante toda a página.
+══════════════════════════════════════════ */
+#bg-video-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+#bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  display: block;
+}
+/* Overlay semitransparente que mantém o vídeo
+   discreto e garante legibilidade do conteúdo */
+#bg-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(245,247,250,0.85) 0%,
+    rgba(245,247,250,0.72) 40%,
+    rgba(245,247,250,0.72) 60%,
+    rgba(245,247,250,0.85) 100%
+  );
+}
+
+/* Tudo acima do vídeo precisa de z-index > 0 */
+.hero,
+.overview-strip,
+.page-content,
+.tl-section,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ══ BARRA DE PROGRESSO ══ */
+#video-progress-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--ctg-cyan);
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* ══ HERO ══ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--ctg-blue-dark);
+}
+.hero-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 42%; background: var(--ctg-blue); clip-path: polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%); z-index: 0; }
+.hero-panel-lines { position: absolute; inset: 0; background-image: repeating-linear-gradient(-30deg, transparent, transparent 18px, rgba(255,255,255,0.04) 18px, rgba(255,255,255,0.04) 19px); }
+.hero-noise { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); opacity: 0.5; z-index: 0; }
+.hero-content { position: relative; z-index: 2; padding: 2rem 7vw; max-width: 1100px; }
+
+.hero-eyebrow { display: flex; align-items: center; gap: 14px; margin-bottom: 2.8rem; animation: fadeUp 0.8s ease forwards; opacity: 0; }
+.hero-eyebrow-tag { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; padding: 5px 14px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+.hero-eyebrow-tag.accent { background: rgba(0,174,239,0.18); border-color: rgba(0,174,239,0.4); color: var(--ctg-cyan); }
+.hero-pretitle { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 1rem; animation: fadeUp 0.8s 0.1s ease forwards; opacity: 0; }
+.hero-title { font-family: 'DM Serif Display', serif; font-size: clamp(2.6rem, 5.5vw, 5.2rem); font-weight: 400; line-height: 1.08; color: #FFFFFF; margin-bottom: 0.6rem; animation: fadeUp 0.8s 0.2s ease forwards; opacity: 0; }
+.hero-title em { font-style: italic; color: var(--ctg-cyan); }
+.hero-plants { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 2rem 0 3rem; animation: fadeUp 0.8s 0.35s ease forwards; opacity: 0; }
+.plant-tag { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 2px; padding: 6px 16px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; color: rgba(255,255,255,0.65); }
+.plant-tag.highlight { border-color: rgba(0,174,239,0.4); color: var(--ctg-cyan); background: rgba(0,174,239,0.08); }
+.hero-actions { display: flex; gap: 0.9rem; flex-wrap: wrap; animation: fadeUp 0.8s 0.5s ease forwards; opacity: 0; }
+.btn { font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 13px 30px; border-radius: 2px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-fill { background: var(--ctg-blue); color: #FFFFFF; box-shadow: 0 4px 20px rgba(0,102,179,0.4); }
+.btn-fill:hover { background: var(--ctg-blue-light); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,102,179,0.5); }
+.btn-ghost { background: transparent; color: rgba(255,255,255,0.65); border: 1px solid rgba(255,255,255,0.2); }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.45); color: rgba(255,255,255,0.9); }
+.hero-signature { position: absolute; bottom: 2.1rem; right: 7vw; z-index: 2; font-size: 0.75rem; font-family: 'DM Serif Display', serif; font-style: italic; color: rgba(255,255,255,0.85); letter-spacing: 0.12em; animation: fadeUp 1s 1.2s ease forwards; opacity: 0; user-select: none; }
+.hero-scroll { position: absolute; bottom: 2rem; left: 7vw; z-index: 2; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.22); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; animation: fadeUp 1s 1s ease forwards; opacity: 0; }
+.hero-scroll-line { width: 40px; height: 1px; background: rgba(255,255,255,0.2); animation: expand 2s 1.5s ease forwards; transform-origin: left; transform: scaleX(0); }
+@keyframes expand { to { transform: scaleX(1); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ══ OVERVIEW STRIP ══ */
+.overview-strip { background: var(--ink); padding: 0 7vw; }
+.overview-strip-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid rgba(255,255,255,0.06); }
+.strip-cell { padding: 2rem 1.5rem 2rem 0; border-right: 1px solid rgba(255,255,255,0.06); }
+.strip-cell:last-child  { border-right: none; padding-left: 1.5rem; }
+.strip-cell:first-child { padding-left: 0; }
+.strip-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 0.4rem; }
+.strip-value { font-size: 0.9rem; font-weight: 500; color: rgba(255,255,255,0.8); line-height: 1.4; }
+.strip-value .accent { color: var(--ctg-cyan); }
+@media (max-width: 700px) { .overview-strip-inner { grid-template-columns: 1fr 1fr; } .strip-cell { border-right: none; padding-left: 0 !important; border-bottom: 1px solid rgba(255,255,255,0.06); } }
+
+/* ══ LAYOUT GENÉRICO ══ */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 5.5rem 7vw; }
+/* Fundo semi-opaco nas seções claras para manter
+   legibilidade com o vídeo atrás */
+.wrap-clear { background: rgba(245,247,250,0.88); backdrop-filter: blur(1px); -webkit-backdrop-filter: blur(1px); }
+.wrap-alt   { background: rgba(238,241,246,0.88); backdrop-filter: blur(1px); -webkit-backdrop-filter: blur(1px); }
+.sep { height: 1px; background: var(--border); max-width: 1100px; margin: 0 auto; }
+.label   { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ctg-blue); margin-bottom: 0.8rem; }
+.heading { font-family: 'DM Serif Display', serif; font-size: clamp(1.7rem, 3vw, 2.6rem); font-weight: 400; line-height: 1.18; color: var(--ink); margin-bottom: 1.2rem; letter-spacing: -0.01em; }
+.body-text { font-size: 1rem; color: var(--ink-mid); line-height: 1.85; max-width: 680px; font-weight: 300; }
+
+/* ══ CONTEXT GRID ══ */
+.context-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 4rem; align-items: start; }
+@media (max-width: 700px) { .context-grid { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+/* ══ CARD DE CONTEXTO ══ */
+.context-card { background: var(--ctg-blue-dark); border-radius: 4px; padding: 1.6rem; }
+.context-card-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 1rem; }
+.context-card-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding-bottom: 0.7rem; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 0.7rem; }
+.context-card-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.context-card-row .key { color: rgba(255,255,255,0.45); }
+.context-card-row .val { font-weight: 600; color: var(--ctg-cyan); }
+
+/* ══ SCOPE GRID ══ */
+.scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-top: 2.5rem; }
+@media (max-width: 700px) { .scope-grid { grid-template-columns: 1fr; } }
+.scope-item { background: rgba(255,255,255,0.94); padding: 1.8rem 2rem; display: flex; gap: 1.4rem; align-items: flex-start; transition: background 0.2s; }
+.scope-item:hover { background: rgba(0,102,179,0.06); }
+.scope-item.full-width { grid-column: 1 / -1; }
+.scope-num   { font-family: 'DM Serif Display', serif; font-size: 2.2rem; font-weight: 400; color: rgba(0,102,179,0.15); line-height: 1; flex-shrink: 0; width: 2.5rem; padding-top: 4px; }
+.scope-title { font-size: 0.9rem; font-weight: 600; color: var(--ink); margin-bottom: 0.45rem; line-height: 1.4; }
+.scope-desc  { font-size: 0.85rem; color: var(--ink-mid); line-height: 1.7; font-weight: 300; }
+
+/* ══ DATA TABLE ══ */
+.data-table { width: 100%; border-collapse: collapse; margin-top: 2.5rem; font-size: 0.88rem; background: rgba(255,255,255,0.94); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.data-table thead th { background: var(--ctg-blue-dark); color: rgba(255,255,255,0.7); padding: 0.9rem 1.3rem; text-align: left; font-weight: 600; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.data-table tbody td { border-bottom: 1px solid var(--border); padding: 0.85rem 1.3rem; color: var(--ink-mid); vertical-align: top; line-height: 1.5; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--ctg-pale); color: var(--ink); }
+.data-table .group-row td { background: rgba(238,241,246,0.96); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); padding: 0.6rem 1.3rem; }
+
+/* ══ RISK/BENEFIT BLOCKS ══ */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+@media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+.risk-block { background: rgba(255,255,255,0.94); border: 1px solid var(--border); border-radius: 4px; padding: 1.8rem; }
+.risk-block.warn { border-left: 3px solid var(--warn-red); }
+.risk-block.info { border-left: 3px solid var(--ctg-blue); }
+.risk-block-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem; }
+.risk-block.warn .risk-block-label { color: var(--warn-red); }
+.risk-block.info .risk-block-label { color: var(--ctg-blue); }
+.risk-list { list-style: none; display: flex; flex-direction: column; gap: 0.85rem; }
+.risk-list li { display: flex; gap: 0.85rem; font-size: 0.88rem; color: var(--ink-mid); line-height: 1.65; align-items: flex-start; }
+.risk-list li .icon { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; margin-top: 2px; }
+.warn .risk-list li .icon { background: var(--warn-bg); color: var(--warn-red); }
+.info .risk-list li .icon { background: var(--ctg-pale); color: var(--ctg-blue); }
+
+/* ══ QUAL GRID ══ */
+.qual-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.5rem; }
+@media (max-width: 780px) { .qual-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .qual-grid { grid-template-columns: 1fr; } }
+.qual-card { background: rgba(255,255,255,0.94); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; transition: border-color 0.2s, box-shadow 0.2s; }
+.qual-card:hover { border-color: var(--border-blue); box-shadow: 0 6px 24px rgba(0,102,179,0.08); }
+.qual-index { font-family: 'DM Serif Display', serif; font-size: 1.6rem; font-weight: 400; color: rgba(0,102,179,0.18); margin-bottom: 0.8rem; line-height: 1; }
+.qual-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); margin-bottom: 0.5rem; }
+.qual-desc  { font-size: 0.82rem; color: var(--ink-mid); line-height: 1.7; font-weight: 300; }
+
+/* ══ PROPOSAL CARDS ══ */
+.prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+@media (max-width: 760px) { .prop-grid { grid-template-columns: 1fr; } }
+.prop-card { border-radius: 4px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; }
+.prop-head { padding: 1.5rem 1.7rem; display: flex; align-items: center; gap: 1rem; }
+.prop-head--tech { background: #01355A; }
+.prop-head--comm { background: var(--ink); }
+.prop-icon { width: 42px; height: 42px; background: rgba(255,255,255,0.1); border-radius: 3px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 1.1rem; flex-shrink: 0; }
+.prop-vol  { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 0.2rem; }
+.prop-name { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 400; color: #FFFFFF; }
+.prop-notice { padding: 0.8rem 1.5rem; font-size: 0.8rem; font-weight: 500; display: flex; gap: 0.6rem; align-items: flex-start; line-height: 1.5; }
+.prop-notice.red  { background: #FEF2F2; color: #991B1B; border-bottom: 1px solid #FEE2E2; }
+.prop-notice.blue { background: var(--ctg-pale); color: var(--ctg-blue-mid); border-bottom: 1px solid var(--border-blue); }
+.prop-notice i { margin-top: 2px; flex-shrink: 0; }
+.prop-body { background: rgba(255,255,255,0.94); flex: 1; }
+.prop-list { list-style: none; padding: 0.6rem 1.5rem 1.5rem; }
+.prop-list li { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.55rem 0; border-bottom: 1px solid rgba(13,26,46,0.05); font-size: 0.85rem; color: var(--ink-mid); line-height: 1.55; }
+.prop-list li:last-child { border-bottom: none; }
+.prop-list li:hover { color: var(--ink); }
+.prop-list li i { color: var(--ctg-blue); font-size: 0.45rem; margin-top: 6px; flex-shrink: 0; opacity: 0.5; }
+.prop-list em { font-style: italic; color: var(--ink-soft); font-size: 0.85em; }
+
+/* ══ TIMELINE ══ */
+.tl-section { background: var(--ctg-blue); padding: 5rem 7vw; }
+.tl-inner   { max-width: 1100px; margin: 0 auto; }
+.tl-inner .label   { color: rgba(255,255,255,0.45); }
+.tl-inner .heading { color: #FFFFFF; margin-bottom: 3rem; }
+.tl-steps { display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
+.tl-connector { position: absolute; top: 15px; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.2); z-index: 0; }
+.tl-step  { position: relative; z-index: 1; padding-right: 2rem; }
+.tl-marker { display: flex; align-items: center; gap: 10px; margin-bottom: 1.4rem; }
+.tl-dot   { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.9); flex-shrink: 0; }
+.tl-phase { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+.tl-date  { font-family: 'DM Serif Display', serif; font-size: 1.5rem; font-weight: 400; color: #FFFFFF; line-height: 1.15; margin-bottom: 0.35rem; }
+.tl-desc  { font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.55; font-weight: 300; }
+@media (max-width: 700px) { .tl-steps { grid-template-columns: 1fr 1fr; gap: 2.5rem 1rem; } .tl-connector { display: none; } }
+
+/* ══ FOOTER ══ */
+footer { background: var(--ink); padding: 3rem 7vw; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; }
+.footer-brand  { font-family: 'DM Serif Display', serif; font-size: 1rem; font-weight: 400; color: rgba(255,255,255,0.8); margin-bottom: 0.3rem; letter-spacing: 0.01em; }
+.footer-sub    { font-size: 0.75rem; color: rgba(255,255,255,0.28); line-height: 1.6; }
+.footer-author { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 0.72rem; color: rgba(255,255,255,0.2); margin-top: 0.65rem; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.5rem; }
+.footer-author::before { content: ''; display: inline-block; width: 18px; height: 1px; background: rgba(255,255,255,0.15); }
+.footer-conf { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 2px; }
+
+/* ══ SCROLL REVEAL ══ */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     VÍDEO DE FUNDO
+     O arquivo deve estar em: assets/video/bg.mp4
+     (estrutura explicada no README do repositório)
+══════════════════════════════════════════════ -->
+<div id="bg-video-wrap">
+  <video id="bg-video" muted playsinline preload="auto">
+    <source src="assets/video/bg.mp4" type="video/mp4">
+  </video>
+  <div id="bg-video-overlay"></div>
+</div>
+
+<!-- Barra de progresso na base da tela -->
+<div id="video-progress-bar"></div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="top">
+  <div class="hero-panel"><div class="hero-panel-lines"></div></div>
+  <div class="hero-noise"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-tag">CTG Brasil</span>
+      <span class="hero-eyebrow-tag accent">IAC202600008</span>
+    </div>
+    <p class="hero-pretitle">Briefing para Proponentes · Janeiro 2026</p>
+    <h1 class="hero-title">
+      Substituição dos<br>
+      <em>Sistemas SCADA</em><br>
+      JUR · ROS · SAG
+    </h1>
+    <div class="hero-plants">
+      <span class="plant-tag highlight">UHE Jurumirim</span>
+      <span class="plant-tag highlight">UHE Rosana</span>
+      <span class="plant-tag highlight">UHE Salto Grande</span>
+    </div>
+    <div class="hero-actions">
+      <a href="#scope" class="btn btn-fill"><i class="fa-solid fa-arrow-down"></i> Escopo do Projeto</a>
+      <a href="#qualification" class="btn btn-ghost">Requisitos de Habilitação</a>
+    </div>
+  </div>
+  <div class="hero-signature">Briefing elaborado por Júlio Casagrande</div>
+  <div class="hero-scroll"><div class="hero-scroll-line"></div><span>Rolar</span></div>
+</section>
+
+<!-- ═══ OVERVIEW STRIP ═══ -->
+<div class="overview-strip">
+  <div class="overview-strip-inner">
+    <div class="strip-cell">
+      <div class="strip-label">Unidades de Negócio</div>
+      <div class="strip-value"><span class="accent">3 UHEs</span> — JUR · ROS · SAG</div>
+    </div>
+    <div class="strip-cell" style="padding-left:1.5rem;">
+      <div class="strip-label">Modalidade</div>
+      <div class="strip-value">Concorrência — Preço Global</div>
+    </div>
+    <div class="strip-cell" style="padding-left:1.5rem;">
+      <div class="strip-label">Critério de Avaliação</div>
+      <div class="strip-value">Menor Preço</div>
+    </div>
+    <div class="strip-cell" style="padding-left:1.5rem;">
+      <div class="strip-label">Validade da Proposta</div>
+      <div class="strip-value"><span class="accent">90 dias</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+
+<div class="sep"></div>
+
+<!-- ═══ CONTEXTO ═══ -->
+<div id="context" class="wrap-clear">
+  <div class="wrap reveal">
+    <p class="label">Contexto do Projeto</p>
+    <div class="context-grid">
+      <div>
+        <h2 class="heading">Sistemas SCADA em operação em plataformas defasadas nas três usinas</h2>
+        <p class="body-text">As Usinas Hidrelétricas de Jurumirim, Rosana e Salto Grande operam sistemas de supervisão e controle (SCADA WinCC) em versões desatualizadas, que não recebem mais atualizações de segurança dos fabricantes e estão fora do alinhamento com os padrões corporativos vigentes da CTG Brasil.</p>
+        <p class="body-text" style="margin-top:1rem;">A presente contratação visa modernizar integralmente o ambiente de supervisão das três usinas, com substituição de hardware, atualização das aplicações, migração para versões suportadas do WinCC e do sistema operacional Windows, e requalificação da equipe técnica local.</p>
+      </div>
+      <div>
+        <div class="context-card">
+          <div class="context-card-label">Versões Atuais do WinCC por Usina</div>
+          <div class="context-card-row"><span class="key">UHE Jurumirim (JUR)</span><span class="val">WinCC 7.5</span></div>
+          <div class="context-card-row"><span class="key">UHE Rosana (ROS)</span><span class="val">WinCC 7.2</span></div>
+          <div class="context-card-row"><span class="key">UHE Salto Grande (SAG)</span><span class="val">WinCC 7.4</span></div>
+          <div class="context-card-row"><span class="key">Prazo Contratual</span><span class="val">14 meses</span></div>
+          <div class="context-card-row"><span class="key">Especificação Técnica</span><span class="val">ET-ENG-495-25</span></div>
+          <div class="context-card-row"><span class="key">Tipo de Contrato</span><span class="val">Preço Global (Lump Sum)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══ NECESSIDADE ═══ -->
+<div class="wrap-alt">
+  <div class="wrap reveal" id="necessity">
+    <p class="label">Necessidade do Projeto</p>
+    <h2 class="heading">Por que este projeto é necessário?</h2>
+    <p class="body-text">Os sistemas SCADA instalados nas três usinas operam em versões sem suporte ativo do fabricante. As versões WinCC 7.2, 7.4 e 7.5 — e seus respectivos sistemas operacionais — não recebem mais patches de segurança, expondo as usinas a riscos cibernéticos crescentes e comprometendo a continuidade operacional a médio prazo.</p>
+    <div class="two-col">
+      <div class="risk-block warn">
+        <div class="risk-block-label"><i class="fa-solid fa-triangle-exclamation" style="margin-right:6px;"></i>Riscos da Não Realização</div>
+        <ul class="risk-list">
+          <li><span class="icon"><i class="fa-solid fa-circle fa-2xs"></i></span>Exposição a ataques cibernéticos por uso de SCADA e sistemas operacionais sem suporte e sem recebimento de patches de segurança</li>
+          <li><span class="icon"><i class="fa-solid fa-circle fa-2xs"></i></span>Indisponibilidade prolongada do sistema de supervisão para operação das usinas, sem possibilidade de suporte técnico do fabricante</li>
+          <li><span class="icon"><i class="fa-solid fa-circle fa-2xs"></i></span>Descumprimento dos requisitos corporativos de cibersegurança e desalinhamento com os padrões tecnológicos da CTG Brasil</li>
+        </ul>
+      </div>
+      <div class="risk-block info">
+        <div class="risk-block-label"><i class="fa-solid fa-circle-check" style="margin-right:6px;"></i>Benefícios Esperados</div>
+        <ul class="risk-list">
+          <li><span class="icon"><i class="fa-solid fa-circle fa-2xs"></i></span>Novo hardware para as três usinas com garantia integral e suporte técnico ativo do fabricante durante toda a vigência contratual</li>
+          <li><span class="icon"><i class="fa-solid fa-circle fa-2xs"></i></span>Atualização para versões suportadas do Windows e do WinCC SCADA, garantindo manutenibilidade e conformidade de longo prazo</li>
+          <li><span class="icon"><i class="fa-solid fa-circle fa-2xs"></i></span>Conformidade com os requisitos corporativos de cibersegurança e capacitação da equipe técnica local por meio de treinamento formal</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══ ESCOPO ═══ -->
+<div class="wrap-clear">
+  <div class="wrap reveal" id="scope">
+    <p class="label">Escopo Detalhado</p>
+    <h2 class="heading">O que a contratação contempla</h2>
+    <p class="body-text">O escopo abaixo se aplica integralmente a cada uma das três usinas hidrelétricas objeto desta contratação. A CONTRATADA deve considerar todas as atividades como indispensáveis ao perfeito atendimento desta Especificação Técnica ET-ENG-495-25.</p>
+    <div class="scope-grid">
+      <div class="scope-item">
+        <div class="scope-num">01</div>
+        <div><div class="scope-title">Fornecimento de Hardware e Licenças</div><div class="scope-desc">Fornecimento de 2 estações de operação (workstation Dell, Intel Xeon, 32GB RAM, 1TB SSD NVMe), 4 monitores 22" Widescreen Dell por usina, além de licenças de Sistema Operacional Windows 11 Pro, SCADA WinCC, banco de dados e antivírus McAfee.</div></div>
+      </div>
+      <div class="scope-item">
+        <div class="scope-num">02</div>
+        <div><div class="scope-title">Atualização da Aplicação SCADA</div><div class="scope-desc">Migração e atualização da aplicação atual de cada usina para a versão mais recente do WinCC, incluindo adequação de todas as telas ao novo padrão Full HD (16:9) e manutenção completa das funções de supervisão, comando e comunicações com os sistemas existentes.</div></div>
+      </div>
+      <div class="scope-item">
+        <div class="scope-num">03</div>
+        <div><div class="scope-title">Testes de Aceitação em Fábrica (TAF)</div><div class="scope-desc">Realização de testes de hardware, funcionais e de desempenho nas instalações da CONTRATADA, com presença de representante da CTG Brasil. Inclui elaboração e aprovação do Procedimento de TAF com antecedência mínima de 30 dias.</div></div>
+      </div>
+      <div class="scope-item">
+        <div class="scope-num">04</div>
+        <div><div class="scope-title">Desmontagem, Instalação e Comissionamento</div><div class="scope-desc">Execução completa das atividades de campo: desmontagem dos equipamentos existentes, instalação e configuração do novo hardware, comissionamento estático e dinâmico integrado aos equipamentos de processo de cada usina.</div></div>
+      </div>
+      <div class="scope-item">
+        <div class="scope-num">05</div>
+        <div><div class="scope-title">Planejamento e Documentação de Campo</div><div class="scope-desc">Elaboração de cronograma físico detalhado por usina em Microsoft Project, com frentes de trabalho, recursos e riscos. Inclui visita técnica prévia, elaboração de toda documentação técnica e entrega dos projetos "As Built" e backups finais.</div></div>
+      </div>
+      <div class="scope-item">
+        <div class="scope-num">06</div>
+        <div><div class="scope-title">Treinamento da Equipe Técnica</div><div class="scope-desc">Capacitação formal da equipe técnica da CTG Brasil para operação, manutenção e configuração dos novos sistemas SCADA WinCC instalados nas três usinas, com foco em procedimentos de contingência e rotinas de backup.</div></div>
+      </div>
+      <div class="scope-item full-width">
+        <div class="scope-num">07</div>
+        <div><div class="scope-title">Logística, Transporte e Custos Acessórios</div><div class="scope-desc">Embalagem, transporte (modalidade INCOTERMS CIF) e entrega dos equipamentos diretamente nas usinas. Inclui todas as despesas de viagem, alimentação e estadia dos profissionais da CONTRATADA durante visitas técnicas e execução em campo.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══ QUANTIDADES ═══ -->
+<div class="wrap-alt">
+  <div class="wrap reveal" id="quantities">
+    <p class="label">Lista de Quantidades</p>
+    <h2 class="heading">Itens conforme a Especificação Técnica ET-ENG-495-25</h2>
+    <p class="body-text">A relação de itens abaixo corresponde ao total consolidado das três usinas (JUR, ROS e SAG), conforme definido nos documentos de licitação.</p>
+    <table class="data-table">
+      <thead><tr><th>Item</th><th>Descrição</th><th>Unid.</th><th>Qtd.</th></tr></thead>
+      <tbody>
+        <tr class="group-row"><td colspan="4">Materiais</td></tr>
+        <tr><td>1</td><td>Estação de Operação (Workstation)</td><td>un</td><td>6</td></tr>
+        <tr><td>2</td><td>Monitor 22" Widescreen</td><td>un</td><td>12</td></tr>
+        <tr><td>3</td><td>Antivírus</td><td>un</td><td>6</td></tr>
+        <tr><td>4</td><td>Licença WinCC</td><td>un</td><td>6</td></tr>
+        <tr><td>5</td><td>Sistema Operacional</td><td>un</td><td>6</td></tr>
+        <tr><td>6</td><td>Monitor 22" Widescreen (sobressalente)</td><td>un</td><td>6</td></tr>
+        <tr><td>7</td><td>Estação de Operação (sobressalente)</td><td>un</td><td>3</td></tr>
+        <tr><td>8</td><td>Antivírus (Estação sobressalente)</td><td>un</td><td>3</td></tr>
+        <tr><td>9</td><td>Sistema Operacional (Estação sobressalente)</td><td>un</td><td>3</td></tr>
+        <tr class="group-row"><td colspan="4">Serviços</td></tr>
+        <tr><td>1</td><td>Projeto e planejamento para substituição do sistema SCADA</td><td>Un.</td><td>3</td></tr>
+        <tr><td>2</td><td>Testes de aceitação em fábrica (TAF)</td><td>Un.</td><td>3</td></tr>
+        <tr><td>3</td><td>Instalação, testes e comissionamento do sistema SCADA na usina</td><td>Un.</td><td>3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══ HABILITAÇÃO ═══ -->
+<div class="wrap-clear">
+  <div class="wrap reveal" id="qualification">
+    <p class="label">Requisitos de Habilitação</p>
+    <h2 class="heading">Critérios de elegibilidade para proponentes</h2>
+    <p class="body-text">Todas as empresas proponentes deverão atender integralmente aos requisitos abaixo para estarem aptas à apresentação de proposta. Propostas de consórcios não serão aceitas.</p>
+    <div class="qual-grid">
+      <div class="qual-card"><div class="qual-index">01</div><div class="qual-title">Habilitação Jurídica</div><div class="qual-desc">A empresa proponente deve ser uma entidade legalmente constituída e registrada, com atividade regular comprovada perante os órgãos competentes.</div></div>
+      <div class="qual-card"><div class="qual-index">02</div><div class="qual-title">Regularidade Financeira</div><div class="qual-desc">A empresa deve demonstrar boa situação financeira, sem déficit consecutivo nos últimos 3 anos ou sem classificação "D" (Default) no relatório Serasa.</div></div>
+      <div class="qual-card"><div class="qual-index">03</div><div class="qual-title">Regularidade Fiscal e Trabalhista</div><div class="qual-desc">A proponente deve apresentar certidões negativas de débitos fiscais, previdenciários e trabalhistas em plena validade na data de apresentação da proposta.</div></div>
+      <div class="qual-card"><div class="qual-index">04</div><div class="qual-title">Capacidade Técnica</div><div class="qual-desc">A empresa deve comprovar experiência na execução de projetos de escopo similar em usinas hidrelétricas, com pelo menos 1 implementação comparável concluída ou declaração do cliente confirmando participação e desempenho.</div></div>
+      <div class="qual-card"><div class="qual-index">05</div><div class="qual-title">Qualificação da Equipe</div><div class="qual-desc">O líder do projeto designado deverá possuir mais de 5 anos de experiência em projetos relevantes e ter liderado com sucesso ao menos 1 projeto de escopo similar.</div></div>
+      <div class="qual-card"><div class="qual-index">06</div><div class="qual-title">Vedação a Consórcios</div><div class="qual-desc">Propostas provenientes de consórcio formado por duas ou mais pessoas jurídicas não são aceitas. Cada proponente deverá participar de forma individual e exclusiva.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══ PROPOSTA ═══ -->
+<div class="wrap-alt">
+  <div class="wrap reveal" id="proposal">
+    <p class="label">Composição da Proposta</p>
+    <h2 class="heading">Documentos exigidos para participação</h2>
+    <p class="body-text">A proposta deverá ser apresentada em dois volumes independentes, contendo obrigatoriamente os itens relacionados abaixo. A ausência de qualquer item poderá ensejar a desclassificação da proponente.</p>
+    <div class="prop-grid">
+      <div class="prop-card">
+        <div class="prop-head prop-head--tech">
+          <div class="prop-icon"><i class="fa-solid fa-file-circle-check"></i></div>
+          <div><div class="prop-vol">Volume I</div><div class="prop-name">Proposta Técnica</div></div>
+        </div>
+        <div class="prop-notice red">
+          <i class="fa-solid fa-ban"></i>
+          <span><strong>A Proposta Técnica obrigatoriamente não deverá conter preços.</strong></span>
+        </div>
+        <div class="prop-body">
+          <ul class="prop-list">
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Detalhamento do escopo de fornecimento e serviços</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Responsabilidades, garantias e condições técnicas</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Prazos de vigência, execução, mobilização e desmobilização</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Cronograma físico detalhado por usina</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Escopo e critério de subcontratação, quando aplicável</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Turno de trabalho e organização das equipes de campo</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Declaração de atendimento integral à Especificação ET-ENG-495-25</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Lista de Exceções com todos os desvios e alternativas, quando aplicável</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Dados completos: razão social, CNPJ, endereço e contatos</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="prop-card">
+        <div class="prop-head prop-head--comm">
+          <div class="prop-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+          <div><div class="prop-vol">Volume II</div><div class="prop-name">Proposta Comercial</div></div>
+        </div>
+        <div class="prop-notice blue">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Condição de Pagamento: <strong>35DDL</strong> — dias 05, 10, 15, 20, 25 ou 30 do mês subsequente</span>
+        </div>
+        <div class="prop-body">
+          <ul class="prop-list">
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Planilha de quantidades e preços unitários e totais</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Impostos inclusos com alíquotas discriminadas <em>(ISS, IPI, ICMS, PIS/COFINS)</em></span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>NCM dos materiais e equipamentos a serem fornecidos</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Cronograma de pagamento e critério de medição por evento contratual</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Prazos de vigência, execução, mobilização e desmobilização</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Índice de reajuste contratual</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Informações sobre frete, DIFAL e demais obrigações fiscais aplicáveis</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Declaração de atendimento integral à Especificação ET-ENG-495-25</span></li>
+            <li><i class="fa-solid fa-circle fa-2xs"></i><span>Dados completos: razão social, CNPJ, endereço e contatos</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-content -->
+
+<!-- ═══ TIMELINE ═══ -->
+<div class="tl-section reveal" id="timeline">
+  <div class="tl-inner">
+    <p class="label">Cronograma do Processo</p>
+    <h2 class="heading">Etapas da Concorrência</h2>
+    <div class="tl-steps">
+      <div class="tl-connector"></div>
+      <div class="tl-step">
+        <div class="tl-marker"><div class="tl-dot">01</div><div class="tl-phase">Fase 01</div></div>
+        <div class="tl-date">Janeiro 2026</div>
+        <div class="tl-desc">Emissão e envio do Briefing para Proponentes</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-marker"><div class="tl-dot">02</div><div class="tl-phase">Fase 02</div></div>
+        <div class="tl-date">A confirmar</div>
+        <div class="tl-desc">Visita Técnica às Usinas JUR, ROS e SAG</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-marker"><div class="tl-dot">03</div><div class="tl-phase">Fase 03</div></div>
+        <div class="tl-date">A confirmar</div>
+        <div class="tl-desc">Sessão de Perguntas e Respostas (Q&amp;A)</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-marker"><div class="tl-dot">04</div><div class="tl-phase">Fase 04</div></div>
+        <div class="tl-date">A confirmar</div>
+        <div class="tl-desc">Prazo Final para Recebimento de Propostas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div>
+    <div class="footer-brand">CTG Brasil · UHEs Jurumirim · Rosana · Salto Grande</div>
+    <div class="footer-sub">
+      IAC202600008 — Substituição dos Sistemas SCADA JUR · ROS · SAG<br>
+      Especificação Técnica: ET-ENG-495-25 &nbsp;·&nbsp; Tipo de Contrato: Preço Global &nbsp;·&nbsp; Prazo: 14 meses
+    </div>
+    <div class="footer-author">Desenvolvido por Júlio Casagrande</div>
+  </div>
+  <div class="footer-conf">Confidencial — Uso Exclusivo dos Proponentes</div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════
+     SCROLL SCRUBBING — lógica completa
+
+     Fases:
+     1. scrollY < heroHeight * 0.7   → vídeo invisível (hero cobre tudo)
+     2. heroHeight * 0.7 → heroHeight → fade-in do vídeo (0 → MAX_OPACITY)
+     3. scrollY > heroHeight         → scrubbing ativo ao longo de
+                                       SCROLL_DURATION_VH vh de rolagem
+     
+     Ajustes:
+     - MAX_OPACITY    → quão visível o vídeo fica (0.0 – 1.0)
+     - SCROLL_DURATION_VH → quantos vh de scroll percorrem o vídeo inteiro
+══════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  const video       = document.getElementById('bg-video');
+  const progressBar = document.getElementById('video-progress-bar');
+
+  const MAX_OPACITY        = 0.22;  // transparência máxima do vídeo
+  const SCROLL_DURATION_VH = 300;   // vh de scroll para percorrer o vídeo
+
+  let videoDuration = 0;
+  let ticking = false;
+
+  video.addEventListener('loadedmetadata', () => {
+    videoDuration = video.duration;
+  });
+  video.load();
+
+  function update() {
+    const heroEl     = document.querySelector('.hero');
+    const heroHeight = heroEl ? heroEl.offsetHeight : window.innerHeight;
+    const scrollY    = window.scrollY;
+    const vpH        = window.innerHeight;
+    const scrollPx   = (SCROLL_DURATION_VH / 100) * vpH;
+
+    // ── Opacidade ─────────────────────────────────
+    const fadeStart = heroHeight * 0.7;
+    const fadeEnd   = heroHeight;
+    let opacity = 0;
+    if (scrollY >= fadeEnd) {
+      opacity = MAX_OPACITY;
+    } else if (scrollY > fadeStart) {
+      opacity = MAX_OPACITY * ((scrollY - fadeStart) / (fadeEnd - fadeStart));
+    }
+    video.style.opacity = opacity;
+
+    // ── Barra de progresso ────────────────────────
+    progressBar.style.opacity = opacity > 0.01 ? '1' : '0';
+
+    // ── Scrubbing ─────────────────────────────────
+    if (videoDuration > 0 && scrollY > heroHeight) {
+      const scrollAfterHero = scrollY - heroHeight;
+      const progress        = Math.min(scrollAfterHero / scrollPx, 1);
+      video.currentTime     = progress * videoDuration;
+      progressBar.style.width = (progress * 100) + '%';
+    } else if (scrollY <= heroHeight) {
+      progressBar.style.width = '0%';
+    }
+
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+
+  // Estado inicial
+  update();
+})();
+</script>
+
+<script>
+  // Scroll reveal
+  const io = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.07 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  document.querySelectorAll('.scope-item').forEach((el, i) => { el.style.transitionDelay = `${i * 0.04}s`; });
+  document.querySelectorAll('.qual-card').forEach((el, i) => { el.style.transitionDelay = `${i * 0.06}s`; });
+</script>
+
+</body>
+</html>
